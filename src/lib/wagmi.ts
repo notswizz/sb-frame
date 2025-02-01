@@ -3,7 +3,7 @@ import { mainnet } from 'wagmi/chains';
 import { frameConnector } from './connector';
 import { publicProvider } from 'wagmi/providers/public';
 
-const { chains, publicClient, webSocketPublicClient } = configureChains(
+const { publicClient, webSocketPublicClient } = configureChains(
   [mainnet],
   [publicProvider()]
 );

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 
-export async function POST(req: Request) {
+export async function POST() {
   const appUrl = process.env.NEXT_PUBLIC_URL;
 
   return NextResponse.json({
@@ -9,12 +9,13 @@ export async function POST(req: Request) {
       image: `${appUrl}/opengraph-image`,
       buttons: [
         {
-          label: 'Launch Demo',
-          action: 'launch_frame',
-          target: appUrl,
-          splash_image_url: `${appUrl}/splash.png`,
-          splash_background_color: '#f7f7f7',
-        }
+          label: 'Send to Chiefs',
+          action: 'post',
+        },
+        {
+          label: 'Send to Eagles',
+          action: 'post',
+        },
       ],
     }
   })

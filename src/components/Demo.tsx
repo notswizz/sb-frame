@@ -1,7 +1,7 @@
 import { useEffect, useCallback, useState } from 'react';
 import sdk from '@farcaster/frame-sdk';
 import { useAccount, useContractRead, useSendTransaction, useConnect } from 'wagmi';
-import { parseUnits, formatUnits, encodeAbiParameters } from 'viem';
+import { parseUnits, formatUnits } from 'viem';
 import { Button } from '~/components/ui/Button';
 import { frameConnector } from '~/lib/connector';
 

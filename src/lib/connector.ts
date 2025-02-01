@@ -3,7 +3,6 @@ import { SwitchChainError, fromHex, getAddress, numberToHex } from 'viem';
 import { ChainNotConfiguredError, createConnector } from 'wagmi';
 
 export function frameConnector() {
-  let connected = false;
   let provider: typeof sdk.wallet.ethProvider | null = null;
 
   return createConnector((config) => ({
@@ -15,7 +14,6 @@ export function frameConnector() {
       try {
         provider = sdk.wallet.ethProvider;
         const accounts = await provider.request({ method: 'eth_requestAccounts' });
-        connected = true;
         
         return {
           account: getAddress(accounts[0]),
@@ -31,7 +29,6 @@ export function frameConnector() {
     },
 
     async disconnect() {
-      connected = false;
       provider = null;
     },
 
@@ -96,7 +93,6 @@ export function frameConnector() {
 
     onDisconnect() {
       config.emitter.emit('disconnect');
-      connected = false;
       provider = null;
     },
 
