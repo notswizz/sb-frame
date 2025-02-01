@@ -1,0 +1,17 @@
+{
+  "frame": {
+    "version": "1",
+    "name": "Frames v2 Demo",
+    "homeUrl": "https://your-domain.com",
+    "imageUrl": "https://your-domain.com/opengraph-image",
+    "buttonTitle": "Launch Demo",
+    "iconUrl": "https://your-domain.com/icon.png",
+    "splashImageUrl": "https://your-domain.com/splash.png",
+    "splashBackgroundColor": "#f7f7f7"
+  },
+  "accountAssociation": {
+    "header": "",
+    "payload": "",
+    "signature": ""
+  }
+} 
