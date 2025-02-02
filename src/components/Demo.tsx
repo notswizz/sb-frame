@@ -1,15 +1,14 @@
 import { useEffect, useCallback, useState } from 'react';
 import sdk from '@farcaster/frame-sdk';
 import { useAccount, useContractRead, useSendTransaction, useConnect } from 'wagmi';
-import { parseUnits, formatUnits } from 'viem';
+import { parseUnits, formatUnits, encodeAbiParameters } from 'viem';
 import { Button } from '~/components/ui/Button';
 import { frameConnector } from '~/lib/connector';
 
-
 // Replace with your actual token details
 const TOKEN_ADDRESS = '0x1603232eEc2e37e001C3ffe75d3c9E27C189005F';
-const CHIEFS_WALLET = '0xebE37CD04425d80A4B3ecaC22D943862E87771C3';
-const EAGLES_WALLET = '0x88697893F35ba3ba47149b9f804eb13a65Bf19f2';
+const WALLET_1 = '0x7b5830fddDa141cecC75407911DE2b470c0b5B71';
+const WALLET_2 = '0x789...';
 
 // ERC20 interface for token
 const TOKEN_ABI = [
@@ -18,16 +17,6 @@ const TOKEN_ABI = [
     "inputs": [{"name": "_owner", "type": "address"}],
     "name": "balanceOf",
     "outputs": [{"name": "balance", "type": "uint256"}],
-    "type": "function"
-  },
-  {
-    "constant": false,
-    "inputs": [
-      {"name": "_to", "type": "address"},
-      {"name": "_value", "type": "uint256"}
-    ],
-    "name": "transfer",
-    "outputs": [{"name": "", "type": "bool"}],
     "type": "function"
   }
 ] as const;
@@ -48,16 +37,15 @@ export default function Demo() {
     functionName: 'balanceOf',
     args: address ? [address] : undefined,
     enabled: !!address,
-    watch: true, // This will update the balance when it changes
+    watch: true,
   });
 
-  const formattedBalance = balance ? formatUnits(balance, 18) : '0'; // Adjust decimals based on your token
-  const displayBalance = Number(formattedBalance).toFixed(4); // Show 4 decimal places
+  const formattedBalance = balance ? formatUnits(balance, 18) : '0';
+  const displayBalance = Number(formattedBalance).toFixed(4);
 
   // Handle amount input change
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    // Only allow numbers and decimals
     if (value === '' || /^\d*\.?\d*$/.test(value)) {
       setAmount(value);
     }
@@ -82,9 +70,14 @@ export default function Demo() {
     try {
       await sendTransaction({
         to: TOKEN_ADDRESS,
-        data: `0xa9059cbb${CHIEFS_WALLET.slice(2).padStart(64, '0')}${parseUnits(amount, 18).toString(16).padStart(64, '0')}`,
-        gas: 1000000n, // Set very high gas limit
-        value: 0n,
+        data: encodeAbiParameters(
+          [
+            { name: '_to', type: 'address' },
+            { name: '_value', type: 'uint256' }
+          ],
+          [WALLET_1, parseUnits(amount, 18)]
+        ),
+        gas: 250000n,
       });
     } catch (err) {
       console.error('Transaction error:', err);
@@ -97,9 +90,14 @@ export default function Demo() {
     try {
       await sendTransaction({
         to: TOKEN_ADDRESS,
-        data: `0xa9059cbb${EAGLES_WALLET.slice(2).padStart(64, '0')}${parseUnits(amount, 18).toString(16).padStart(64, '0')}`,
-        gas: 1000000n, // Set very high gas limit
-        value: 0n,
+        data: encodeAbiParameters(
+          [
+            { name: '_to', type: 'address' },
+            { name: '_value', type: 'uint256' }
+          ],
+          [WALLET_2, parseUnits(amount, 18)]
+        ),
+        gas: 250000n,
       });
     } catch (err) {
       console.error('Transaction error:', err);
@@ -121,11 +119,6 @@ export default function Demo() {
     }
   }, [isSDKLoaded]);
 
-  useEffect(() => {
-    // Log connection status for debugging
-    console.log('Connection status:', { isConnected, address });
-  }, [isConnected, address]);
-
   if (!isSDKLoaded) return <div>Loading...</div>;
 
   return (
@@ -133,7 +126,6 @@ export default function Demo() {
       <h1 className="text-3xl font-bold text-center mb-2 bg-clip-text text-transparent bg-gradient-to-r from-yellow-400 to-yellow-200">
         Super Bowl 2025
       </h1>
-      <p className="text-center text-sm mb-6 text-gray-300">by @notswizz</p>
       
       <div className="mb-4 text-center">
         {!isConnected ? (
@@ -146,18 +138,23 @@ export default function Demo() {
           </Button>
         ) : (
           <>
-            <div className="mb-4 flex items-center justify-center px-2 bg-gray-800/50 py-2 rounded-lg">
+            <div className="mb-4 flex items-center justify-between px-2 bg-gray-800/50 py-2 rounded-lg">
               <span className="text-sm text-gray-300">
                 Connected: {formatAddress(address || '')}
               </span>
-             
+              <button
+                onClick={() => sdk.wallet.disconnect()}
+                className="text-sm text-gray-400 hover:text-white transition-colors"
+              >
+                Disconnect
+              </button>
             </div>
 
             <p className="mb-4 text-yellow-400 font-medium">
               {isBalanceLoading ? (
                 "Loading balance..."
               ) : (
-                `SB25 Balance: ${displayBalance}`
+                `Token Balance: ${displayBalance}`
               )}
             </p>
 
@@ -181,7 +178,7 @@ export default function Demo() {
                 isLoading={isPending}
                 className="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 group relative overflow-hidden"
               >
-                <span className="relative z-10">BET Chiefs</span>
+                <span className="relative z-10">Send to Chiefs</span>
                 <div className="absolute inset-0 bg-gradient-to-r from-yellow-500 to-red-600 opacity-0 group-hover:opacity-20 transition-opacity" />
               </Button>
               
@@ -191,7 +188,7 @@ export default function Demo() {
                 isLoading={isPending}
                 className="w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 group relative overflow-hidden"
               >
-                <span className="relative z-10">BET Eagles</span>
+                <span className="relative z-10">Send to Eagles</span>
                 <div className="absolute inset-0 bg-gradient-to-r from-gray-200 to-green-400 opacity-0 group-hover:opacity-20 transition-opacity" />
               </Button>
             </div>

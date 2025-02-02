@@ -3,14 +3,14 @@ import App from "~/app/app";
 
 const appUrl = process.env.NEXT_PUBLIC_URL;
 
-interface Props {
-  params: Promise<{
+interface PageProps {
+  params: {
     name: string;
-  }>;
+  };
 }
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { name } = await params;
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { name } = params;
 
   const frame = {
     version: "next",
@@ -40,8 +40,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default async function HelloNameFrame({ params }: Props) {
-  const { name } = await params;
+export default async function Page({ params }: PageProps) {
+  const { name } = params;
 
-  return <App title={`Hello, ${name}`} />;
+  return <App />;
 }

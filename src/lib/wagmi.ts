@@ -15,4 +15,9 @@ export const config = createConfig({
   ],
   publicClient,
   webSocketPublicClient,
-}); 
+});
+
+// Add this to ensure the config is properly initialized
+if (typeof window !== 'undefined') {
+  console.log('Wagmi config initialized');
+} 
